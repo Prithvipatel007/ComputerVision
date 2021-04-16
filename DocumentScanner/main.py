@@ -16,6 +16,7 @@ grayScaleImage = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 # find edges
 
 edges = cv.Canny(grayScaleImage, 110, 200)
+#cv.imshow('Image with edges', edges)
 
-cv.imshow('Image with edges', edges)
 cv.waitKey(0)
+cv.destroyAllWindows()
