@@ -1,16 +1,21 @@
-# This is a sample Python script.
+import cv2 as cv
+import numpy as np
+import imutils
+from skimage.filters import threshold_local
+import matplotlib.pyplot as plt
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+# Load the image using cv
 
+img = cv.imread('../../../images/document.jpg')
+# cv.imshow('Document Original', img)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# convert image into grayscale
+grayScaleImage = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+# cv.imshow('GrayScaled Image', grayScaleImage)
 
+# find edges
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+edges = cv.Canny(grayScaleImage, 110, 200)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+cv.imshow('Image with edges', edges)
+cv.waitKey(0)
