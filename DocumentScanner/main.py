@@ -35,7 +35,7 @@ def reorder(myPoints):
 
 
 # Load the image using cv
-img = cv.imread('../../../images/document.jpg')
+img = cv.imread('../../../images/document1.jpg')
 # cv.imshow('Document Original', img)
 
 rows = img.shape[0]
@@ -67,15 +67,16 @@ prepTransform = cv.getPerspectiveTransform(actualArea, expectedArea)
 imgTransform = cv.warpPerspective(img, prepTransform, (cols, rows))
 
 grayImgTransform = cv.cvtColor(imgTransform, cv.COLOR_BGR2GRAY)
-ret, thresh1 = cv.threshold(grayImgTransform, 139, 255, cv.THRESH_BINARY)
-# imgAdaptiveThre = cv.adaptiveThreshold(thresh1, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2)
+#ret, thresh1 = cv.threshold(grayImgTransform, 139, 255, cv.THRESH_BINARY)
 
+se=cv.getStructuringElement(cv.MORPH_RECT , (8,8))
+bg=cv.morphologyEx(grayImgTransform, cv.MORPH_DILATE, se)
+out_gray=cv.divide(grayImgTransform, bg, scale=255)
+out_binary=cv.threshold(out_gray, 0, 255, cv.THRESH_OTSU)[1]
 
-# imgAdaptiveThre = cv.adaptiveThreshold(grayImgTransform, 255, 1, 1, 7, 4)
-# imgAdaptiveThre = cv.bitwise_not(imgAdaptiveThre)
-# imgAdaptiveThre = cv.medianBlur(imgAdaptiveThre, 3)
+imgAdaptiveThre = cv.adaptiveThreshold(out_binary, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 7)
 
-cv.imshow('image with contours', thresh1)
+cv.imshow('image with contours', imgAdaptiveThre)
 
 cv.waitKey(0)
 cv.destroyAllWindows()
