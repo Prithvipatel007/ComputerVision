@@ -1,16 +1,11 @@
-# This is a sample Python script.
+import cv2 as cv
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+vid = cv.VideoCapture('../../camera_calibration_videos/checkerboard_000.h264')
+success, image = vid.read()
+count = 0
+while success:
+    cv.imwrite("../../camera_calibration_videos/checkerboard_000_frames/frame%d.jpg" % count,
+               image)  # save frame as JPEG file
+    success, image = vid.read()
+    print('count : ' + str(count))
+    count += 1
