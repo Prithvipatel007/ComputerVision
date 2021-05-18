@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 
 def biggestContour(contours):
     biggest = np.array([])
-    max_area = 0
+    max_area = 0.0
     for i in contours:
         area = cv.contourArea(i)
-        if area > 5000:
+        if area > 100.0:
             peri = cv.arcLength(i, True)
             approx = cv.approxPolyDP(i, 0.02 * peri, True)
             if area > max_area and len(approx) == 4:
@@ -35,8 +35,8 @@ def reorder(myPoints):
 
 
 # Load the image using cv
-img = cv.imread('../../../images/document1.jpg')
-# cv.imshow('Document Original', img)
+img = cv.imread('../../../images/document2.jpg')
+#cv.imshow('Document Original', img)
 
 rows = img.shape[0]
 cols = img.shape[1]
@@ -46,22 +46,22 @@ grayScaleImage = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 blurredImage = cv.GaussianBlur(grayScaleImage, (5, 5), 1)
 edges = cv.Canny(blurredImage, 50, 150)
 
-contours, hierarchy = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+contours = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
 print("Number of contours = " + str(len(contours)))
 
 '''
 Finding the Biggest Contour Points to find Corners of the document
 '''
-biggest, maxArea = biggestContour(contours)
+biggestContourVector, maxArea = biggestContour(contours)
 
 '''
 reorder the coordinates
 '''
-biggest = reorder(biggest)
+biggestContourVector = reorder(biggestContourVector)
 
-cv.drawContours(img, biggest, -1, (0, 255, 0), 20)
+cv.drawContours(img, biggestContourVector, -1, (0, 255, 0), 20)
 
-actualArea = np.float32(biggest)
+actualArea = np.float32(biggestContourVector)
 expectedArea = np.float32([[0, 0], [cols, 0], [0, rows], [cols, rows]])
 prepTransform = cv.getPerspectiveTransform(actualArea, expectedArea)
 imgTransform = cv.warpPerspective(img, prepTransform, (cols, rows))
@@ -74,9 +74,9 @@ bg=cv.morphologyEx(grayImgTransform, cv.MORPH_DILATE, se)
 out_gray=cv.divide(grayImgTransform, bg, scale=255)
 out_binary=cv.threshold(out_gray, 0, 255, cv.THRESH_OTSU)[1]
 
-imgAdaptiveThre = cv.adaptiveThreshold(out_binary, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 7)
+#imgAdaptiveThre = cv.adaptiveThreshold(out_binary, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 7)
 
-cv.imshow('image with contours', imgAdaptiveThre)
+cv.imshow('Binarized image', out_binary)
 
 cv.waitKey(0)
 cv.destroyAllWindows()
