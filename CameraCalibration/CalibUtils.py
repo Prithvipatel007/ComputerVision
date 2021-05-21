@@ -5,16 +5,17 @@ import pickle
 import matplotlib.pyplot as plt
 
 
-def generateFramesFromVideo(inputPath, outputPath):
+def generateFramesFromVideo(inputPath, outputPath, cnt):
     vid = cv.VideoCapture(inputPath)  # input path as Video
     success, image = vid.read()
-    count = 0
+    count = cnt
     while success:
         cv.imwrite(outputPath + "frame%d.jpg" % count,
                    image)  # save frame as JPEG file
         success, image = vid.read()
         print('count : ' + str(count))
         count += 1
+    return count
 
 
 def calibTraining(cbrow, cbcol, framePath):
