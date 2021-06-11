@@ -8,14 +8,14 @@ import CalibUtils as cut
  checkerboard Dimensions
 '''
 
-cbrow = 5
+cbrow = 6
 cbcol = 7
 inputPath1 = '../../camera_calibration_videos/checkerboard_000.h264'
 inputPath2 = '../../camera_calibration_videos/checkerboard_019.h264'
 outputPath = "../../camera_calibration_videos/checkerboard_000_frames/"
 framePath = '../../camera_calibration_videos/checkerboard_000_frames/*.jpg'
 
-imageToCheck = '../../camera_calibration_videos/checkerboard_000_frames/frame255.jpg'
+imageToCheck = '../../camera_calibration_videos/checkerboard_000_frames/frame609.jpg'
 
 '''
     Generate dataset from videos if dataset is not available.
@@ -23,8 +23,8 @@ imageToCheck = '../../camera_calibration_videos/checkerboard_000_frames/frame255
 '''
 if len(os.listdir(outputPath)) == 0:
     print("Directory is empty. Generating Frames from Videos")
-    count = cut.generateFramesFromVideo(inputPath1, outputPath, 0)
-    _ = cut.generateFramesFromVideo(inputPath2, outputPath, count+1)
+    count = cut.generateFramesFromVideo(inputPath2, outputPath, 0)
+    # _ = cut.generateFramesFromVideo(inputPath2, outputPath, count+1)
 else:
     print("Dataset available")
 
@@ -62,10 +62,6 @@ dst = cv.undistort(img, mtx, dist, None, newcameramtx)
 x, y, w, h = roi
 dst = dst[y:y + h, x:x + w]
 cv.imwrite('calibresult.png', dst)
-plt.subplot(1, 2, 1)
-plt.imshow(img)
-plt.subplot(1, 2, 2)
-plt.imshow(dst)
 
 mean_error = 0
 for i in range(len(objpoints)):

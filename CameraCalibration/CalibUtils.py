@@ -49,6 +49,7 @@ def calibTraining(cbrow, cbcol, framePath):
 
             # Draw and display the corners
             cv.drawChessboardCorners(img, (cbcol, cbrow), corners2, ret)
+            cv.imwrite('correction.png', img)
 
     print("Processing Camera Calibration")
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
