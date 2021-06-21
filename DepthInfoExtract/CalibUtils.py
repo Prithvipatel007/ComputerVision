@@ -44,7 +44,7 @@ def calibTraining(cbrow, cbcol, framePath):
         if ret:
             objpoints.append(objp)
 
-            corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+            corners2 = cv.cornerSubPix(gray, corners, (7, 7), (-1, -1), criteria)
             imgpoints.append(corners)
 
             # Draw and display the corners
@@ -53,10 +53,12 @@ def calibTraining(cbrow, cbcol, framePath):
 
     print("Processing Camera Calibration")
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+    print("Camera Calibration Complete")
+
     return ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints
 
 
-def writeCalibResults(ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints):
+def writeCalibResults(ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints, filename):
     # Save the camera calibration results.
     calib_result_pickle = {"ret": ret,
                            "mtx": mtx,
@@ -66,10 +68,11 @@ def writeCalibResults(ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints):
                            "objpoints": objpoints,
                            "imgpoints": imgpoints}
 
-    pickle.dump(calib_result_pickle, open("camera_calib_pickle.p", "wb"))
+    pickle.dump(calib_result_pickle, open(filename, "wb"))
 
-def readCalibResults():
-    calib_result_pickle = pickle.load(open("camera_calib_pickle.p", "rb"))
+
+def readCalibResults(filename):
+    calib_result_pickle = pickle.load(open(filename, "rb"))
     ret = calib_result_pickle["ret"]
     mtx = calib_result_pickle["mtx"]
     dist = calib_result_pickle["dist"]
@@ -80,14 +83,20 @@ def readCalibResults():
 
     return ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints
 
-def undistort(imageToCheck, mtx, dist):
-    img = cv.imread(imageToCheck)
-    h, w = img.shape[:2]
-    newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
 
-    # undistort
-    dst = cv.undistort(img, mtx, dist, None, newcameramtx)
-    # crop the image
-    x, y, w, h = roi
-    dst = dst[y:y + h, x:x + w]
-    cv.imwrite('calibresult.png', dst)
+def undistort(imageToCheck, mtx, dist, undistortOutputPath):
+    images = glob.glob(imageToCheck)
+    count = 0
+    for image in images:
+        print("Undistorting " + image)
+        img = cv.imread(image)
+        h, w = img.shape[:2]
+        newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
+
+        # undistorted
+        dst = cv.undistort(img, mtx, dist, None, newcameramtx)
+        # crop the image
+        x, y, w, h = roi
+        dst = dst[y:y + h, x:x + w]
+        cv.imwrite(undistortOutputPath + "undistorted%d.png" % count, dst)
+        count += 1

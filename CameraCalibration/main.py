@@ -44,6 +44,7 @@ else:
 '''
 ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints = cut.readCalibResults()
 
+'''
 print("Camera Calibration:\n ", ret)
 print("\nCamera Matrix:\n ", mtx)
 print("\nDistortion Parameters\n: ", dist)
@@ -51,17 +52,9 @@ print("\nRotation Vectors:\n ", rvecs)
 print("\nTranslation Vectors:\n ", tvecs)
 print("\nObject Points:\n ", objpoints)
 print("\nImage Points:\n ", imgpoints)
+'''
 
-img = cv.imread(imageToCheck)
-h, w = img.shape[:2]
-newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
-
-# undistort
-dst = cv.undistort(img, mtx, dist, None, newcameramtx)
-# crop the image
-x, y, w, h = roi
-dst = dst[y:y + h, x:x + w]
-cv.imwrite('calibresult.png', dst)
+cut.undistort(imageToCheck, mtx, dist)
 
 mean_error = 0
 for i in range(len(objpoints)):
