@@ -3,6 +3,8 @@ import CalibUtils as cut
 import cv2 as cv
 import logging
 import numpy as np
+import math
+from numpy import linalg as LA
 
 cbrow = 5
 cbcol = 5
@@ -10,9 +12,10 @@ inputPath1 = '../../DepthInfoVideos/250_cm_distance.h264'
 inputPath2 = '../../DepthInfoVideos/3D_metal_printer.h264'
 inputPath3 = '../../DepthInfoVideos/schwalbe.h264'  
 outputPath = "../../DepthInfoVideos/images/"
-framePath = '../../DepthInfoVideos/images/*.jpg'
+framePath = '../../DepthInfoVideos/images/*.png'
+undistortedFramePath = '../../DepthInfoVideos/undistorted_images/*.png'
 
-imageToCheck = '../../DepthInfoVideos/images/*.jpg'
+imageToCheck = '../../DepthInfoVideos/images/*.png'
 undistortOutputPath = '../../DepthInfoVideos/undistorted_images/'
 originalPickleFile = "camera_calib_pickle.p"
 undistortedPickleFile = "undistorted_camera_calib_pickle.p"
@@ -23,23 +26,23 @@ def executeCameraCalibration(filename):
         If dataset available, move on
     '''
     if len(os.listdir(outputPath)) == 0:
-        logging.info("Directory is empty. Generating Frames from Videos")
-        count = cut.generateFramesFromVideo(inputPath1, outputPath, 0)
+        print("Directory is empty. Generating Frames from Videos")
+        count = cut.generateFramesFromVideo(inputPath2, outputPath, 0)
         #count1 = cut.generateFramesFromVideo(inputPath2, outputPath, count)
         #count2 = cut.generateFramesFromVideo(inputPath3, outputPath, count1)
         #count3 = cut.generateFramesFromVideo(inputPath4, outputPath, count2)
     else:
-        logging.info("Dataset available")
+        print("Dataset available")
 
     '''
         if filename.p available, no training required
         if not, train camera data and store data into camera_calib_pickle.p file
     '''
     if os.path.isfile(filename):
-        logging.info("Training not required")
+        print("Training not required")
     else:
-        logging.info("Training Required")
-        ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints = cut.calibTraining(cbrow, cbcol, framePath)
+        print("Training Required")
+        ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints = cut.calibTraining(cbrow, cbcol, framePath, False)
         cut.writeCalibResults(ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints, filename)
 
     '''
@@ -59,23 +62,37 @@ def executeCameraCalibration(filename):
     if len(os.listdir(undistortOutputPath)) == 0:
         cut.undistort(imageToCheck, mtx, dist, undistortOutputPath)
     else:
-        logging.info("Images already Undistorted")
+        print("Images already Undistorted")
 
     mean_error = 0
     for i in range(len(objpoints)):
         imgpoints2, _ = cv.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
         error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2) / len(imgpoints2)
         mean_error += error
-    logging.info("total error: {}".format(mean_error / len(objpoints)))
+    print("total error: {}".format(mean_error / len(objpoints)))
     return 0
+
+def executeCameraCalibrationUndistorted(filename):
+    if os.path.isfile(filename):
+        print("Training not required")
+    else:
+        print("Training Required")
+        ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints = cut.calibTraining(cbrow, cbcol, undistortedFramePath, True)
+        cut.writeCalibResults(ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints, filename)
 
 if __name__ == "__main__":
     executeCameraCalibration(originalPickleFile)
-    ''' Calculate the distance '''
-    ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints = cut.readCalibResults(originalPickleFile)
-    logging.info('Computing PNP')
-    ret1, rvec1, tvec1 = cv.solvePnP( objpoints,imgpoints , mtx, dist)
-    print(tvec1)
+    executeCameraCalibrationUndistorted(undistortedPickleFile)
+    ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints = cut.readCalibResults(undistortedPickleFile)
+    p1 = np.array([499, 140, 1])
+    p2 = np.array([499, 271, 1])
+    v1 = np.matmul(LA.inv(mtx), p1)
+    v2 = np.matmul(LA.inv(mtx), p2)
+    theta = math.acos(np.dot(v1, v2) / (LA.norm(v1) * LA.norm(v2)))
+    width_height = 2 * (484 * math.tan(theta / 2))
+    distance = 25 / math.tan(theta / 2)
+    print(distance)
+
 
 
 

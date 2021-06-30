@@ -10,7 +10,7 @@ def generateFramesFromVideo(inputPath, outputPath, cnt):
     success, image = vid.read()
     count = cnt
     while success:
-        cv.imwrite(outputPath + "frame%d.jpg" % count,
+        cv.imwrite(outputPath + "frame%d.png" % count,
                    image)  # save frame as JPEG file
         success, image = vid.read()
         print('count : ' + str(count))
@@ -18,7 +18,7 @@ def generateFramesFromVideo(inputPath, outputPath, cnt):
     return count
 
 
-def calibTraining(cbrow, cbcol, framePath):
+def calibTraining(cbrow, cbcol, framePath, genCorrection):
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -49,7 +49,8 @@ def calibTraining(cbrow, cbcol, framePath):
 
             # Draw and display the corners
             cv.drawChessboardCorners(img, (cbcol, cbrow), corners2, ret)
-            cv.imwrite('correction.png', img)
+            if genCorrection:
+                cv.imwrite('correction.png', img)
 
     print("Processing Camera Calibration")
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
