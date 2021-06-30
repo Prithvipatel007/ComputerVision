@@ -6,8 +6,8 @@ import numpy as np
 import math
 from numpy import linalg as LA
 
-cbrow = 5
-cbcol = 5
+cbrow = 6
+cbcol = 7
 inputPath1 = '../../DepthInfoVideos/250_cm_distance.h264'
 inputPath2 = '../../DepthInfoVideos/3D_metal_printer.h264'
 inputPath3 = '../../DepthInfoVideos/schwalbe.h264'  
@@ -84,13 +84,14 @@ if __name__ == "__main__":
     executeCameraCalibration(originalPickleFile)
     executeCameraCalibrationUndistorted(undistortedPickleFile)
     ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints = cut.readCalibResults(undistortedPickleFile)
-    p1 = np.array([499, 140, 1])
-    p2 = np.array([499, 271, 1])
+    # Height
+    p1 = np.array([685, 237, 1])
+    p2 = np.array([685, 773, 1])
     v1 = np.matmul(LA.inv(mtx), p1)
     v2 = np.matmul(LA.inv(mtx), p2)
     theta = math.acos(np.dot(v1, v2) / (LA.norm(v1) * LA.norm(v2)))
-    width_height = 2 * (484 * math.tan(theta / 2))
     distance = 25 / math.tan(theta / 2)
+    width_height = 2 * (distance * math.tan(theta / 2))
     print(distance)
 
 

@@ -44,7 +44,7 @@ def calibTraining(cbrow, cbcol, framePath, genCorrection):
         if ret:
             objpoints.append(objp)
 
-            corners2 = cv.cornerSubPix(gray, corners, (7, 7), (-1, -1), criteria)
+            corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
             imgpoints.append(corners)
 
             # Draw and display the corners
