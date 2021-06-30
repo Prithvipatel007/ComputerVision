@@ -7,15 +7,15 @@ import math
 from numpy import linalg as LA
 
 cbrow = 6
-cbcol = 7
+cbcol = 6
 inputPath1 = '../../DepthInfoVideos/250_cm_distance.h264'
 inputPath2 = '../../DepthInfoVideos/3D_metal_printer.h264'
 inputPath3 = '../../DepthInfoVideos/schwalbe.h264'  
 outputPath = "../../DepthInfoVideos/images/"
-framePath = '../../DepthInfoVideos/images/*.png'
+framePath = '../../DepthInfoVideos/images/*.jpg'
 undistortedFramePath = '../../DepthInfoVideos/undistorted_images/*.png'
 
-imageToCheck = '../../DepthInfoVideos/images/*.png'
+imageToCheck = '../../DepthInfoVideos/images/*.jpg'
 undistortOutputPath = '../../DepthInfoVideos/undistorted_images/'
 originalPickleFile = "camera_calib_pickle.p"
 undistortedPickleFile = "undistorted_camera_calib_pickle.p"
@@ -27,7 +27,7 @@ def executeCameraCalibration(filename):
     '''
     if len(os.listdir(outputPath)) == 0:
         print("Directory is empty. Generating Frames from Videos")
-        count = cut.generateFramesFromVideo(inputPath2, outputPath, 0)
+        count = cut.generateFramesFromVideo(inputPath1, outputPath, 0)
         #count1 = cut.generateFramesFromVideo(inputPath2, outputPath, count)
         #count2 = cut.generateFramesFromVideo(inputPath3, outputPath, count1)
         #count3 = cut.generateFramesFromVideo(inputPath4, outputPath, count2)
@@ -84,16 +84,32 @@ if __name__ == "__main__":
     executeCameraCalibration(originalPickleFile)
     executeCameraCalibrationUndistorted(undistortedPickleFile)
     ret, mtx, dist, rvecs, tvecs, objpoints, imgpoints = cut.readCalibResults(undistortedPickleFile)
-    # Height
-    p1 = np.array([685, 237, 1])
-    p2 = np.array([685, 773, 1])
+    # Distance
+    p1 = np.array([700, 420, 1])
+    p2 = np.array([812, 420, 1])
     v1 = np.matmul(LA.inv(mtx), p1)
     v2 = np.matmul(LA.inv(mtx), p2)
     theta = math.acos(np.dot(v1, v2) / (LA.norm(v1) * LA.norm(v2)))
     distance = 25 / math.tan(theta / 2)
-    width_height = 2 * (distance * math.tan(theta / 2))
-    print(distance)
+    print(" Distance : " + str(distance))
 
+    # Height
+    h1 = np.array([684, 215, 1])
+    h2 = np.array([684, 672, 1])
+    v11 = np.matmul(LA.inv(mtx), h1)
+    v12 = np.matmul(LA.inv(mtx), h2)
+    theta1 = math.acos(np.dot(v11, v12) / (LA.norm(v11) * LA.norm(v12)))
+    height = 2 * (distance * math.tan(theta1 / 2))
+    print(" Height : " + str(height))
+
+    # Width
+    w1 = np.array([685, 421, 1])
+    w2 = np.array([919, 421, 1])
+    v21 = np.matmul(LA.inv(mtx), w1)
+    v22 = np.matmul(LA.inv(mtx), w2)
+    theta2 = math.acos(np.dot(v21, v22) / (LA.norm(v21) * LA.norm(v22)))
+    width = 2 * (distance * math.tan(theta2 / 2))
+    print(" Width : " + str(width))
 
 
 

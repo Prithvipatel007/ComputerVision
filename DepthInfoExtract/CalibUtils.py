@@ -10,7 +10,7 @@ def generateFramesFromVideo(inputPath, outputPath, cnt):
     success, image = vid.read()
     count = cnt
     while success:
-        cv.imwrite(outputPath + "frame%d.png" % count,
+        cv.imwrite(outputPath + "frame%d.jpg" % count,
                    image)  # save frame as JPEG file
         success, image = vid.read()
         print('count : ' + str(count))
